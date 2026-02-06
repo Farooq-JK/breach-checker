@@ -1,14 +1,13 @@
-# config.py
-# Loads API settings from environment variables
+# Loads API settings (like API key) from the .env file
 
 import os
 from dotenv import load_dotenv
 
-# Load values from .env file
+# Read variables from .env into environment
 load_dotenv()
 
-# HIBP key
+# Get API key safely from environment (not hardcoded)
 API_KEY = os.getenv("HIBP_API_KEY")
 
-# HIBP base endpoint
+# Base URL for the Have I Been Pwned API
 BASE_URL = "https://haveibeenpwned.com/api/v3"
