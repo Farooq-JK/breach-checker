@@ -27,7 +27,7 @@ output_result.csv → results
 ### 1. Create virtual environment
 
 Windows:
-python -m venv .venv
+py -m venv .venv
 .venv\Scripts\activate
 
 Mac/Linux:
