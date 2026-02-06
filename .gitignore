@@ -1,0 +1,14 @@
+# secrets
+.env
+
+# virtual environment
+.venv/
+
+# python cache
+__pycache__/
+
+# test cache
+.pytest_cache/
+
+# output file (optional)
+output_result.csv
