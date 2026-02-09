@@ -22,7 +22,7 @@ def check_email(email):
 
     try:
         # ✅ try request twice max (retry once if rate limited)
-        for attempt in range(2):
+        for attempt in range(4):
 
             response = requests.get(
                 f"{BASE_URL}/breachedaccount/{email}",
