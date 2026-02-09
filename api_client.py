@@ -1,7 +1,8 @@
 # Handles communication with the Have I Been Pwned API
 
 import requests
-import time  # ✅ used for retry delay
+import time
+import logging  # ✅ professional logging
 
 from config import API_KEY, BASE_URL
 
@@ -21,39 +22,45 @@ def check_email(email):
     }
 
     try:
-        # ✅ try request twice max (retry once if rate limited)
+        # ✅ retry a few times if rate limited
         for attempt in range(4):
+
+            logging.info(f"Sending request for {email} (attempt {attempt + 1})")
 
             response = requests.get(
                 f"{BASE_URL}/breachedaccount/{email}",
                 headers=headers,
-                timeout=10
+                timeout=10  # prevents hanging forever
             )
 
             # ✅ breached
             if response.status_code == 200:
                 breaches = response.json()
                 sites = [b["Name"] for b in breaches]
+                logging.info(f"Breaches found for {email}")
                 return True, sites
 
             # ✅ safe
             elif response.status_code == 404:
+                logging.info(f"No breaches found for {email}")
                 return False, []
 
-            # ✅ rate limit → wait then retry
+            # ✅ rate limit → wait and retry
             elif response.status_code == 429:
-                print("Rate limited. Waiting before retry...")
-                time.sleep(3)  # wait longer before retry
-                continue  # try again
+                logging.warning("Rate limited (429). Waiting before retry...")
+                time.sleep(3)
+                continue
 
-            # other unexpected codes
+            # ❌ unexpected status
             else:
-                print(f"API returned {response.status_code} for {email}")
+                logging.error(f"Unexpected API status {response.status_code} for {email}")
                 return False, []
 
-        # if still failing after retry
+        # ❌ still failing after retries
+        logging.error(f"Max retries reached for {email}")
         return False, []
 
+    # ❌ network problems
     except requests.exceptions.RequestException as e:
-        print(f"Connection error while checking {email}: {str(e)}")
+        logging.error(f"Connection error while checking {email}: {str(e)}")
         return False, []
