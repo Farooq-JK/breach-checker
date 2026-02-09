@@ -1,6 +1,8 @@
 # Handles communication with the Have I Been Pwned API
 
 import requests
+import time  # ✅ used for retry delay
+
 from config import API_KEY, BASE_URL
 
 
@@ -10,41 +12,48 @@ def check_email(email):
 
     Returns:
         (True, [breach names])  -> if breached
-        (False, [])            -> if safe or error
+        (False, [])            -> if safe
     """
 
-    # Required headers for the API request
     headers = {
         "hibp-api-key": API_KEY,
         "user-agent": "breach-checker-app"
     }
 
     try:
-        # Send GET request to HIBP endpoint
-        response = requests.get(
-            f"{BASE_URL}/breachedaccount/{email}",
-            headers=headers,
-            timeout=10
-        )
+        # ✅ try request twice max (retry once if rate limited)
+        for attempt in range(2):
 
-        # If breaches exist
-        if response.status_code == 200:
-            breaches = response.json()
+            response = requests.get(
+                f"{BASE_URL}/breachedaccount/{email}",
+                headers=headers,
+                timeout=10
+            )
 
-            # Keep only breach names for cleaner output
-            sites = [b["Name"] for b in breaches]
-            return True, sites
+            # ✅ breached
+            if response.status_code == 200:
+                breaches = response.json()
+                sites = [b["Name"] for b in breaches]
+                return True, sites
 
-        # If no breaches found
-        elif response.status_code == 404:
-            return False, []
+            # ✅ safe
+            elif response.status_code == 404:
+                return False, []
 
-        # Any other unexpected response
-        else:
-            print(f"API returned {response.status_code} for {email}")
-            return False, []
+            # ✅ rate limit → wait then retry
+            elif response.status_code == 429:
+                print("Rate limited. Waiting before retry...")
+                time.sleep(3)  # wait longer before retry
+                continue  # try again
 
-    # Handle network/connection errors safely
+            # other unexpected codes
+            else:
+                print(f"API returned {response.status_code} for {email}")
+                return False, []
+
+        # if still failing after retry
+        return False, []
+
     except requests.exceptions.RequestException as e:
         print(f"Connection error while checking {email}: {str(e)}")
         return False, []
