@@ -1,82 +1,148 @@
-# Email Breach Checker
 
-This is a small Python application that checks if email addresses have been exposed in data breaches using the Have I Been Pwned (HIBP) API.
+# Breach Checker – Email Breach Screening Tool
 
-The program:
-- reads emails from a CSV file
-- checks each email using the API
-- saves the results to another CSV file
+## Overview
+Breach Checker is a simple Python command‑line application that checks multiple email addresses against the Have I Been Pwned (HIBP) API and reports whether they appear in known data breaches.
 
----
-
-## Project Files
-
-main.py → runs the program  
-api_client.py → connects to the API  
-csv_utils.py → reads/writes CSV files  
-config.py → loads API key  
-email_list.csv → input emails  
-output_result.csv → results  
-.env → stores your API key
-.env.example → template file  
+The project demonstrates:
+- API integration
+- secure environment variables (.env)
+- logging
+- retry + rate limiting
+- unit testing with pytest
+- Continuous Integration with GitHub Actions
+- clean modular design
 
 ---
 
-## Setup
+## Full Project Structure
+
+breach_checker/
+│
+├── main.py                     # entry point – runs full workflow
+├── api_client.py               # sends requests to HIBP API
+├── csv_utils.py                # reads input CSV & writes results CSV
+├── config.py                   # loads API key from .env safely
+│
+├── email_list.csv              # input emails (sample data)
+├── output_result.csv           # generated results (auto-created)
+│
+├── tests/
+│   └── test_basic.py           # pytest unit tests for CSV logic
+│
+├── .github/workflows/
+│   └── tests.yml               # GitHub Actions CI workflow (auto tests)
+│
+├── requirements.txt            # dependencies list
+├── README.md                   # documentation
+│
+├── .env                        # API key (private – NOT committed)
+├── .env.example                # template for API key
+├── .gitignore                  # ignores secrets, cache, venv
+│
+└── .venv/                      # virtual environment (local only)
+
+---
+
+## Installation
 
 ### 1. Create virtual environment
-
 Windows:
-py -m venv .venv
+python -m venv .venv
 .venv\Scripts\activate
 
 Mac/Linux:
 python -m venv .venv
 source .venv/bin/activate
 
----
-
 ### 2. Install packages
-
 pip install -r requirements.txt
 
 ---
 
-### 3. Add your API key
+## Configuration
 
-Create a file called `.env` in the project folder:
+Create a .env file:
 
 HIBP_API_KEY=your_api_key_here
 
+Never upload this file to GitHub.
+
 ---
 
-## Run
+## Usage
 
+Run:
 python main.py
 
----
+Input:
+email_list.csv
 
-## Input (email_list.csv)
-
-example@example.com
-test@gmail.com
-
----
-
-## Output (output_result.csv)
-
-email_address, breached, site_where_breached
+Output:
+output_result.csv
 
 ---
 
-## Test
+## Testing
 
-pytest
+Run locally:
+pytest -v
+
+Tests check:
+- single email
+- empty file
+- multiple emails
 
 ---
 
-## Notes
+## Continuous Integration (CI)
 
-- Do not share your API key
-- Keep the .env file private
-- This project is for learning purposes
+This project uses **GitHub Actions** to automatically run tests every time code is pushed to GitHub.
+
+It will:
+- install dependencies
+- run `pytest`
+- show a green ✓ if tests pass
+- show a red ✗ if tests fail
+
+This helps make sure the application always works correctly.
+
+Workflow file:
+.github/workflows/tests.yml
+
+---
+
+## Logging
+
+The application uses Python logging instead of print():
+- INFO → progress messages
+- WARNING → recoverable issues
+- ERROR → failures
+
+Example:
+2026-02-10 18:22:01 - INFO - Checking: test@example.com
+
+---
+
+## Security Practices
+- API key stored in .env only
+- .env ignored by git
+- no hardcoded secrets
+- request timeouts
+- retry on 429 rate limits
+- structured outputs
+
+---
+
+## Dependencies
+- requests
+- python-dotenv
+- pytest
+
+Install with:
+pip install -r requirements.txt
+
+---
+
+## Author
+Farooq
