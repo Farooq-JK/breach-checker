@@ -1,19 +1,41 @@
-# Handles communication with the Have I Been Pwned API
+# Handles communication with breach intelligence providers
+# Currently supports Have I Been Pwned (HIBP)
+# Designed to be easily extended with additional providers later
 
 import requests
 import time
-import logging  # ✅ professional logging
+import logging
 
 from config import API_KEY, BASE_URL
 
 
+# -------------------------------------------------
+# Public function used by main.py
+# DO NOT change this signature
+# Allows swapping/adding providers internally
+# -------------------------------------------------
 def check_email(email):
     """
-    Check one email against the API.
+    Main entry point for checking an email.
+    Can support multiple providers in future.
 
     Returns:
         (True, [breach names])  -> if breached
         (False, [])            -> if safe
+    """
+
+    # For now → only HIBP
+    return check_hibp(email)
+
+
+# -------------------------------------------------
+# Provider 1: Have I Been Pwned (HIBP)
+# -------------------------------------------------
+def check_hibp(email):
+    """
+    HIBP-specific implementation.
+    Separated so additional providers can be added later
+    without modifying main application logic.
     """
 
     headers = {
@@ -22,45 +44,44 @@ def check_email(email):
     }
 
     try:
-        # ✅ retry a few times if rate limited
+        # retry a few times if rate limited
         for attempt in range(4):
 
-            logging.info(f"Sending request for {email} (attempt {attempt + 1})")
+            logging.info(f"HIBP request for {email} (attempt {attempt + 1})")
 
             response = requests.get(
                 f"{BASE_URL}/breachedaccount/{email}",
                 headers=headers,
-                timeout=10  # prevents hanging forever
+                timeout=10
             )
 
-            # ✅ breached
+            # breached
             if response.status_code == 200:
                 breaches = response.json()
                 sites = [b["Name"] for b in breaches]
                 logging.info(f"Breaches found for {email}")
                 return True, sites
 
-            # ✅ safe
+            # safe
             elif response.status_code == 404:
                 logging.info(f"No breaches found for {email}")
                 return False, []
 
-            # ✅ rate limit → wait and retry
+            # rate limited → retry
             elif response.status_code == 429:
                 logging.warning("Rate limited (429). Waiting before retry...")
                 time.sleep(3)
                 continue
 
-            # ❌ unexpected status
+            # unexpected response
             else:
                 logging.error(f"Unexpected API status {response.status_code} for {email}")
                 return False, []
 
-        # ❌ still failing after retries
         logging.error(f"Max retries reached for {email}")
         return False, []
 
-    # ❌ network problems
     except requests.exceptions.RequestException as e:
         logging.error(f"Connection error while checking {email}: {str(e)}")
         return False, []
+
