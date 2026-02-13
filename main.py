@@ -1,13 +1,10 @@
 # Entry point of the application (runs the full breach check process)
-
 import time
 import logging
 import csv                      # ✅ for reading results CSV
 import matplotlib.pyplot as plt  # ✅ for chart visualisation
-
 from csv_utils import read_emails, write_results
 from api_client import check_email
-
 
 # -------------------------------------------------
 # Logging configuration
@@ -19,13 +16,9 @@ logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s - %(levelname)s - %(message)s"
 )
-
-
 # Input and output file names
 INPUT_FILE = "email_list.csv"
 OUTPUT_FILE = "output_result.csv"
-
-
 # -------------------------------------------------
 # ✅ NEW: simple visualisation function
 # Creates bar chart: breached vs safe emails
@@ -34,7 +27,6 @@ OUTPUT_FILE = "output_result.csv"
 def create_breach_chart(csv_file):
     breached = 0
     safe = 0
-
     # Read output CSV and count results
     with open(csv_file, newline="") as f:
         reader = csv.DictReader(f)
@@ -58,12 +50,9 @@ def create_breach_chart(csv_file):
     plt.close()
 
     logging.info("Chart saved to breach_summary.png")
-
-
 # -------------------------------------------------
 # Main process
 # -------------------------------------------------
-
 # Read emails from CSV
 emails = read_emails(INPUT_FILE)
 results = []
@@ -93,12 +82,10 @@ for email in emails:
 
     time.sleep(1.6)
 
-
 # Save all results to output file
 write_results(OUTPUT_FILE, results)
 
 logging.info(f"Done. Results saved to {OUTPUT_FILE}")
-
 
 # -------------------------------------------------
 # ✅ NEW: generate visual summary chart
