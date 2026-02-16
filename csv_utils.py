@@ -1,5 +1,3 @@
-# Handles reading input emails and writing output results to CSV files
-
 import csv
 
 

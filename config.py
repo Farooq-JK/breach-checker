@@ -1,5 +1,3 @@
-# Loads API settings (like API key) from the .env file
-
 import os
 from dotenv import load_dotenv
 

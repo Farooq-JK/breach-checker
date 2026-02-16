@@ -1,42 +1,14 @@
-# Handles communication with breach intelligence providers
-# Currently supports Have I Been Pwned (HIBP)
-# Designed to be easily extended with additional providers later
-
 import requests
 import time
 import logging
 
 from config import API_KEY, BASE_URL
 
-
-# -------------------------------------------------
-# Public function used by main.py
-# DO NOT change this signature
-# Allows swapping/adding providers internally
-# -------------------------------------------------
 def check_email(email):
-    """
-    Main entry point for checking an email.
-    Can support multiple providers in future.
-
-    Returns:
-        (True, [breach names])  -> if breached
-        (False, [])            -> if safe
-    """
-
-    # For now → only HIBP
     return check_hibp(email)
 
-
-# -------------------------------------------------
 # Provider 1: Have I Been Pwned (HIBP)
-# -------------------------------------------------
 def check_hibp(email):
-    """
-    HIBP-specific implementation.
-    Separated so additional providers can be added later
-    without modifying main application logic.
-    """
 
     headers = {
         "hibp-api-key": API_KEY,

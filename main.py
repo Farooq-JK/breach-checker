@@ -1,33 +1,71 @@
-# Entry point of the application (runs the full breach check process)
 import time
 import logging
-import csv                      # ✅ for reading results CSV
-import matplotlib.pyplot as plt  # ✅ for chart visualisation
+import csv                      # read CSV results
+import matplotlib.pyplot as plt  # chart visualisation
+
 from csv_utils import read_emails, write_results
 from api_client import check_email
 
-# -------------------------------------------------
-# Logging configuration
-# INFO = normal progress messages
-# WARNING = recoverable issues
-# ERROR = serious problems
-# -------------------------------------------------
+
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s - %(levelname)s - %(message)s"
 )
-# Input and output file names
+
+# Input and output files
 INPUT_FILE = "email_list.csv"
 OUTPUT_FILE = "output_result.csv"
-# -------------------------------------------------
-# ✅ NEW: simple visualisation function
-# Creates bar chart: breached vs safe emails
-# Saves image as breach_summary.png
-# -------------------------------------------------
+
+# Read emails from CSV
+emails = read_emails(INPUT_FILE)
+results = []
+
+logging.info(f"Found {len(emails)} email(s) to check.")
+
+# Check each email one-by-one
+for email in emails:
+
+    email = email.strip().lower()
+
+    # INFO → normal progress
+    logging.info(f"Checking: {email}")
+
+    try:
+        # Call API
+        breached, sites = check_email(email)
+
+    # WARNING → temporary issue (retry)
+    except TimeoutError:
+        logging.warning("Rate limited or timeout. Waiting before retry...")
+        time.sleep(5)
+        breached, sites = check_email(email)
+
+    # ERROR → serious failure (skip email)
+    except Exception as e:
+        logging.error(f"Connection error occurred for {email}: {e}")
+        continue   # skip this email and move on
+
+    # Save result
+    results.append({
+        "email_address": email,
+        "breached": breached,
+        "site_where_breached": ";".join(sites)
+    })
+
+    # polite delay to respect API limits
+    time.sleep(1.6)
+
+# Save results
+write_results(OUTPUT_FILE, results)
+
+logging.info(f"Done. Results saved to {OUTPUT_FILE}")
+
+# Create simple breach summary chart
 def create_breach_chart(csv_file):
     breached = 0
     safe = 0
-    # Read output CSV and count results
+
+    # Count breached vs safe emails
     with open(csv_file, newline="") as f:
         reader = csv.DictReader(f)
 
@@ -45,49 +83,11 @@ def create_breach_chart(csv_file):
     plt.title("Breach Summary")
     plt.ylabel("Number of Emails")
 
-    # Save image (important for CLI apps)
+    # Save chart to file
     plt.savefig("breach_summary.png")
     plt.close()
 
     logging.info("Chart saved to breach_summary.png")
-# -------------------------------------------------
-# Main process
-# -------------------------------------------------
-# Read emails from CSV
-emails = read_emails(INPUT_FILE)
-results = []
 
-logging.info(f"Found {len(emails)} email(s) to check.")
-
-
-# Check each email using the API (one-by-one only)
-for email in emails:
-
-    email = email.strip().lower()
-    logging.info(f"Checking: {email}")
-
-    try:
-        breached, sites = check_email(email)
-
-    except Exception:
-        logging.warning("Rate limit hit. Waiting and retrying...")
-        time.sleep(5)
-        breached, sites = check_email(email)
-
-    results.append({
-        "email_address": email,
-        "breached": breached,
-        "site_where_breached": ";".join(sites)
-    })
-
-    time.sleep(1.6)
-
-# Save all results to output file
-write_results(OUTPUT_FILE, results)
-
-logging.info(f"Done. Results saved to {OUTPUT_FILE}")
-
-# -------------------------------------------------
-# ✅ NEW: generate visual summary chart
-# -------------------------------------------------
+# Generate visual summary chart
 create_breach_chart(OUTPUT_FILE)
