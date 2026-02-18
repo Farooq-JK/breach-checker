@@ -1,7 +1,3 @@
-# Handles communication with breach intelligence providers
-# Currently supports Have I Been Pwned (HIBP)
-# Designed to be easily extended with additional providers later
-
 import requests
 import time
 import logging
@@ -18,8 +14,6 @@ from config import API_KEY, BASE_URL, TIMEOUT, MAX_RETRIES, RETRY_DELAY
 def check_email(email):
     return check_hibp(email)
 
-
-# -------------------------------------------------
 # Provider 1: Have I Been Pwned (HIBP)
 # -------------------------------------------------
 

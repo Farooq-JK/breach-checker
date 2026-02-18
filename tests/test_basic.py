@@ -1,4 +1,3 @@
-# allow tests to import project modules
 import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
@@ -15,7 +14,6 @@ def test_read_emails(tmp_path):
     )
 
     emails = read_emails(test_file)
-
     assert emails == ["test@example.com"]
 
 
@@ -42,3 +40,6 @@ def test_read_emails_multiple(tmp_path):
     emails = read_emails(test_file)
 
     assert emails == ["a@test.com", "b@test.com", "c@test.com"]
+
+
+

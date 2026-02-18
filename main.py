@@ -26,6 +26,11 @@ OUTPUT_FILE = "output_result.csv"
 # Create breach summary chart
 # -------------------------------------------------
 def create_breach_chart(csv_file):
+    """
+    Reads the output CSV file and generates
+    a bar chart showing breached vs safe emails.
+    """
+
     breached = 0
     safe = 0
 
