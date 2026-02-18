@@ -7,9 +7,9 @@ import logging
 import csv
 import matplotlib.pyplot as plt
 
-from csv_utils import read_emails, write_results
-from api_client import check_email
-from config import POLITE_DELAY, SUMMARY_CHART
+from src.csv_utils import read_emails, write_results
+from src.api_client import check_email
+from src.config import POLITE_DELAY, SUMMARY_CHART
 
 
 # Logging setup

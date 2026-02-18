@@ -2,7 +2,7 @@ import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 
-from csv_utils import read_emails
+from src.csv_utils import read_emails
 
 
 # Test 1: single email with header

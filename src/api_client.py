@@ -2,7 +2,7 @@ import requests
 import time
 import logging
 
-from config import API_KEY, BASE_URL, TIMEOUT, MAX_RETRIES, RETRY_DELAY
+from src.config import API_KEY, BASE_URL, TIMEOUT, MAX_RETRIES, RETRY_DELAY
 
 
 # -------------------------------------------------
