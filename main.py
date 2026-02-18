@@ -1,93 +1,80 @@
-# Entry point of the application (runs the full breach check process)
+# -------------------------------------------------
+# Entry point of the application
+# -------------------------------------------------
+
 import time
 import logging
-import csv                      # ✅ for reading results CSV
-import matplotlib.pyplot as plt  # ✅ for chart visualisation
+import csv
+import matplotlib.pyplot as plt
+
 from csv_utils import read_emails, write_results
 from api_client import check_email
+from config import POLITE_DELAY, SUMMARY_CHART
 
-# -------------------------------------------------
-# Logging configuration
-# INFO = normal progress messages
-# WARNING = recoverable issues
-# ERROR = serious problems
-# -------------------------------------------------
+
+# Logging setup
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s - %(levelname)s - %(message)s"
 )
-# Input and output file names
+
 INPUT_FILE = "email_list.csv"
 OUTPUT_FILE = "output_result.csv"
+
+
 # -------------------------------------------------
-# ✅ NEW: simple visualisation function
-# Creates bar chart: breached vs safe emails
-# Saves image as breach_summary.png
+# Create breach summary chart
 # -------------------------------------------------
 def create_breach_chart(csv_file):
     breached = 0
     safe = 0
-    # Read output CSV and count results
-    with open(csv_file, newline="") as f:
-        reader = csv.DictReader(f)
 
+    with open(csv_file, newline="", encoding="utf-8") as f:
+        reader = csv.DictReader(f)
         for row in reader:
             if row["breached"] == "True":
                 breached += 1
             else:
                 safe += 1
 
-    labels = ["Breached", "Safe"]
-    values = [breached, safe]
-
-    # Create bar chart
-    plt.bar(labels, values)
+    plt.bar(["Breached", "Safe"], [breached, safe])
     plt.title("Breach Summary")
     plt.ylabel("Number of Emails")
-
-    # Save image (important for CLI apps)
-    plt.savefig("breach_summary.png")
+    plt.savefig(SUMMARY_CHART)
     plt.close()
 
-    logging.info("Chart saved to breach_summary.png")
+    logging.info(f"Chart saved to {SUMMARY_CHART}")
+
+
 # -------------------------------------------------
-# Main process
+# Main execution
 # -------------------------------------------------
-# Read emails from CSV
-emails = read_emails(INPUT_FILE)
-results = []
+def main():
+    emails = read_emails(INPUT_FILE)
+    results = []
 
-logging.info(f"Found {len(emails)} email(s) to check.")
+    logging.info(f"Found {len(emails)} email(s) to check.")
 
+    for email in emails:
+        email = email.strip().lower()
+        logging.info(f"Checking: {email}")
 
-# Check each email using the API (one-by-one only)
-for email in emails:
-
-    email = email.strip().lower()
-    logging.info(f"Checking: {email}")
-
-    try:
         breached, sites = check_email(email)
 
-    except Exception:
-        logging.warning("Rate limit hit. Waiting and retrying...")
-        time.sleep(5)
-        breached, sites = check_email(email)
+        results.append({
+            "email_address": email,
+            "breached": breached,
+            "site_where_breached": ";".join(sites)
+        })
 
-    results.append({
-        "email_address": email,
-        "breached": breached,
-        "site_where_breached": ";".join(sites)
-    })
+        time.sleep(POLITE_DELAY)
 
-    time.sleep(1.6)
+    write_results(OUTPUT_FILE, results)
+    logging.info(f"Results saved to {OUTPUT_FILE}")
 
-# Save all results to output file
-write_results(OUTPUT_FILE, results)
+    create_breach_chart(OUTPUT_FILE)
 
-logging.info(f"Done. Results saved to {OUTPUT_FILE}")
 
-# -------------------------------------------------
-# ✅ NEW: generate visual summary chart
-# -------------------------------------------------
-create_breach_chart(OUTPUT_FILE)
+# Run application
+if __name__ == "__main__":
+    main()

@@ -6,7 +6,7 @@ import requests
 import time
 import logging
 
-from config import API_KEY, BASE_URL
+from config import API_KEY, BASE_URL, TIMEOUT, MAX_RETRIES, RETRY_DELAY
 
 
 # -------------------------------------------------
@@ -14,29 +14,16 @@ from config import API_KEY, BASE_URL
 # DO NOT change this signature
 # Allows swapping/adding providers internally
 # -------------------------------------------------
+
 def check_email(email):
-    """
-    Main entry point for checking an email.
-    Can support multiple providers in future.
-
-    Returns:
-        (True, [breach names])  -> if breached
-        (False, [])            -> if safe
-    """
-
-    # For now → only HIBP
     return check_hibp(email)
 
 
 # -------------------------------------------------
 # Provider 1: Have I Been Pwned (HIBP)
 # -------------------------------------------------
+
 def check_hibp(email):
-    """
-    HIBP-specific implementation.
-    Separated so additional providers can be added later
-    without modifying main application logic.
-    """
 
     headers = {
         "hibp-api-key": API_KEY,
@@ -44,44 +31,44 @@ def check_hibp(email):
     }
 
     try:
-        # retry a few times if rate limited
-        for attempt in range(4):
+        # Retry based on config value (not hardcoded)
+        for attempt in range(MAX_RETRIES):
 
             logging.info(f"HIBP request for {email} (attempt {attempt + 1})")
 
             response = requests.get(
                 f"{BASE_URL}/breachedaccount/{email}",
                 headers=headers,
-                timeout=10
+                timeout=TIMEOUT  # Now uses YAML config
             )
 
-            # breached
+            # 200 → Breached
             if response.status_code == 200:
                 breaches = response.json()
                 sites = [b["Name"] for b in breaches]
                 logging.info(f"Breaches found for {email}")
                 return True, sites
 
-            # safe
+            # 404 → Safe
             elif response.status_code == 404:
                 logging.info(f"No breaches found for {email}")
                 return False, []
 
-            # rate limited → retry
+            # 429 → Rate limited (retry)
             elif response.status_code == 429:
                 logging.warning("Rate limited (429). Waiting before retry...")
-                time.sleep(3)
+                time.sleep(RETRY_DELAY)  # Now from config
                 continue
 
-            # unexpected response
+            # Unexpected response
             else:
                 logging.error(f"Unexpected API status {response.status_code} for {email}")
                 return False, []
 
+        # If max retries reached
         logging.error(f"Max retries reached for {email}")
         return False, []
 
     except requests.exceptions.RequestException as e:
         logging.error(f"Connection error while checking {email}: {str(e)}")
         return False, []
-

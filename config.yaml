@@ -1,0 +1,9 @@
+api:
+  base_url: "https://haveibeenpwned.com/api/v3"
+  timeout: 10
+  max_retries: 4
+  retry_delay: 3
+  polite_delay: 1.6
+
+output:
+  summary_chart: "breach_summary.png"

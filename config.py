@@ -1,13 +1,33 @@
-# Loads API settings (like API key) from the .env file
-
 import os
+import yaml
 from dotenv import load_dotenv
 
-# Read variables from .env into environment
+# -------------------------------------------------
+# Load environment variables (.env)
+# -------------------------------------------------
 load_dotenv()
 
-# Get API key safely from environment (not hardcoded)
-API_KEY = os.getenv("HIBP_API_KEY")
+# -------------------------------------------------
+# Load YAML configuration file
+# -------------------------------------------------
+with open("config.yaml", "r", encoding="utf-8") as file:
+    config_data = yaml.safe_load(file)
 
-# Base URL for the Have I Been Pwned API
-BASE_URL = "https://haveibeenpwned.com/api/v3"
+# -------------------------------------------------
+# API Configuration (from config.yaml)
+# -------------------------------------------------
+BASE_URL = config_data["api"]["base_url"]
+TIMEOUT = config_data["api"]["timeout"]
+MAX_RETRIES = config_data["api"]["max_retries"]
+RETRY_DELAY = config_data["api"]["retry_delay"]
+POLITE_DELAY = config_data["api"]["polite_delay"]
+
+# -------------------------------------------------
+# Output Configuration
+# -------------------------------------------------
+SUMMARY_CHART = config_data["output"]["summary_chart"]
+
+# -------------------------------------------------
+# Secret API Key (from environment only)
+# -------------------------------------------------
+API_KEY = os.getenv("HIBP_API_KEY")
