@@ -22,9 +22,7 @@ INPUT_FILE = "email_list.csv"
 OUTPUT_FILE = "output_result.csv"
 
 
-# -------------------------------------------------
 # Create breach summary chart
-# -------------------------------------------------
 def create_breach_chart(csv_file):
     """
     Reads the output CSV file and generates
@@ -51,9 +49,7 @@ def create_breach_chart(csv_file):
     logging.info(f"Chart saved to {SUMMARY_CHART}")
 
 
-# -------------------------------------------------
 # Main execution
-# -------------------------------------------------
 def main():
     emails = read_emails(INPUT_FILE)
     results = []

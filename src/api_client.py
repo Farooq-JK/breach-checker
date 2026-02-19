@@ -25,7 +25,7 @@ def check_hibp(email):
     }
 
     try:
-        # Retry based on config value (not hardcoded)
+        # Retry based on config value
         for attempt in range(MAX_RETRIES):
 
             logging.info(f"HIBP request for {email} (attempt {attempt + 1})")
@@ -33,7 +33,7 @@ def check_hibp(email):
             response = requests.get(
                 f"{BASE_URL}/breachedaccount/{email}",
                 headers=headers,
-                timeout=TIMEOUT  # Now uses YAML config
+                timeout=TIMEOUT  
             )
 
             # 200 → Breached
@@ -51,7 +51,7 @@ def check_hibp(email):
             # 429 → Rate limited (retry)
             elif response.status_code == 429:
                 logging.warning("Rate limited (429). Waiting before retry...")
-                time.sleep(RETRY_DELAY)  # Now from config
+                time.sleep(RETRY_DELAY)  
                 continue
 
             # Unexpected response

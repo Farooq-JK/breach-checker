@@ -1,4 +1,3 @@
-# allow tests to import project modules
 import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
@@ -8,11 +7,8 @@ from unittest.mock import patch, Mock
 
 from src.api_client import check_hibp
 
-
-# -------------------------------------------------
 # Test 1: 200 response (breached)
-# -------------------------------------------------
-@patch("api_client.requests.get")
+@patch("src.api_client.requests.get")
 def test_check_hibp_breached(mock_get):
 
     # Mock successful breach response
@@ -27,10 +23,8 @@ def test_check_hibp_breached(mock_get):
     assert sites == ["Adobe", "LinkedIn"]
 
 
-# -------------------------------------------------
 # Test 2: 404 response (safe)
-# -------------------------------------------------
-@patch("api_client.requests.get")
+@patch("src.api_client.requests.get")
 def test_check_hibp_safe(mock_get):
 
     mock_response = Mock()
@@ -43,10 +37,8 @@ def test_check_hibp_safe(mock_get):
     assert sites == []
 
 
-# -------------------------------------------------
 # Test 3: 429 retry then success
-# -------------------------------------------------
-@patch("api_client.requests.get")
+@patch("src.api_client.requests.get")
 def test_check_hibp_retry(mock_get):
 
     mock_429 = Mock()
@@ -65,10 +57,8 @@ def test_check_hibp_retry(mock_get):
     assert sites == ["Dropbox"]
 
 
-# -------------------------------------------------
 # Test 4: Network error handling
-# -------------------------------------------------
-@patch("api_client.requests.get")
+@patch("src.api_client.requests.get")
 def test_check_hibp_connection_error(mock_get):
 
     mock_get.side_effect = requests.exceptions.RequestException
