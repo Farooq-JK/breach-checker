@@ -1,34 +1,38 @@
 import csv
 
-# Read email addresses from CSV file
+
+# Read email addresses from a CSV file
 def read_emails(file_path):
 
     emails = []
 
-    # Open the input file
+    # Open the file and read it using the header row
     with open(file_path, newline="", encoding="utf-8") as file:
-        reader = csv.DictReader(file)  # Uses header row
+        reader = csv.DictReader(file)
 
-        # Loop through rows and collect valid emails
+        # Go through each row and collect valid email addresses
         for row in reader:
             email = row.get("email_address")
 
-            # Only add non-empty emails
+            # Ignore empty or blank values
             if email and email.strip():
                 emails.append(email.strip())
 
     return emails
 
 
-# Write breach results to CSV file
+# Save breach check results into a new CSV file
 def write_results(file_path, results):
 
-    # Open output file in write mode
+    # Create or overwrite the output file
     with open(file_path, "w", newline="", encoding="utf-8") as file:
         writer = csv.DictWriter(
             file,
             fieldnames=["email_address", "breached", "site_where_breached"]
         )
 
-        writer.writeheader()      # Write column names
-        writer.writerows(results) # Write result rows
+        # Write column headers first
+        writer.writeheader()
+
+        # Write all result rows to the file
+        writer.writerows(results)
