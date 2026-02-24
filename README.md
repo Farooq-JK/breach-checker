@@ -80,18 +80,10 @@ pip install -r requirements.txt
 
 ## Configuration
 
-Create a `.env` file:
+Rename `.env.example` to `.env`, then open it and paste the HIBP API key in
 
 ``` bash
 HIBP_API_KEY=your_api_key_here
-```
-
-Example `config.yaml`:
-
-``` yaml
-timeout: 10
-max_retries: 4
-retry_delay: 3
 ```
 
 ------------------------------------------------------------------------
