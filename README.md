@@ -1,8 +1,8 @@
-# Breach Checker -- Email Breach Screening Tool
+# Breach Checker Application
 
 ## Overview
 
-Breach Checker is a Python command-line application that checks email
+Breach Checker is a Python application that checks email
 addresses against the Have I Been Pwned (HIBP) API and reports whether
 they appear in known data breaches.
 
@@ -20,7 +20,6 @@ and CI integration.
 -   Structured logging
 -   CSV input and output
 -   Unit testing with pytest
--   Mocked API testing
 -   GitHub Actions CI
 
 ------------------------------------------------------------------------
@@ -93,10 +92,6 @@ HIBP_API_KEY=your_api_key_here
 ``` bash
 python -m src.main
 ```
-
-Input: `email_list.csv`
-Output: `output_result.csv`
-Chart: `breach_summary.png`
 
 ------------------------------------------------------------------------
 
